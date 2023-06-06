@@ -58,15 +58,18 @@ function fazerMerge() {
         const vetor1 = programa.vetores[valor1].vetor;
         const vetor2 = programa.vetores[valor2].vetor;
 
-        vetor1.push(...vetor2);
+        const novoValor = programa.vetores[valor1].valor * programa.vetores[valor2].valor;
+        const novaBranch = {
+          valor: novoValor,
+          vetor: [...vetor1, ...vetor2],
+        };
 
-        const valorMultiplicado = programa.vetores[valor1].valor * programa.vetores[valor2].valor;
-
-        const hash = calcularHash(valorMultiplicado.toString()).substring(0, 6);
-        programa.vetores[valor1].hash = hash;
+        const hash = calcularHash(novoValor.toString()).substring(0, 6);
+        novaBranch.hash = hash;
         programa.comandos[hash] = "Merge";
+        programa.vetores[novoValor] = novaBranch;
 
-        console.log(`Branchs Mescladas! ${valor1} * ${valor2} = ${valorMultiplicado}. Hash: ${hash}`);
+        console.log(`Branchs Mescladas! ${valor1} * ${valor2} = ${novoValor}. Hash: ${hash}`);
 
         executarPrograma();
       } else {
