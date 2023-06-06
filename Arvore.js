@@ -1,7 +1,9 @@
 const readline = require('readline');
+const crypto = require('crypto');
 
 const programa = {
   vetores: {},
+  comandos: {},
 };
 
 const rl = readline.createInterface({
@@ -16,7 +18,11 @@ function criarBranch() {
     const vetor = [];
     programa.vetores[valor] = { valor: valor, vetor: vetor };
 
-    console.log(`Nova Branch criada com valor "${valor}".`);
+    const hash = calcularHash(valor).substring(0, 6);
+    programa.vetores[valor].hash = hash;
+    programa.comandos[hash] = "Branch";
+
+    console.log(`Nova Branch criada com valor "${valor}". Hash: ${hash}`);
     executarPrograma();
   });
 }
@@ -28,9 +34,14 @@ function fazerCommit() {
         const branch = programa.vetores[valorAtual];
         delete programa.vetores[valorAtual];
         branch.valor = novoValor;
+
+        const hash = calcularHash(novoValor).substring(0, 6);
+        branch.hash = hash;
+        programa.comandos[hash] = "Commit";
+
         programa.vetores[novoValor] = branch;
 
-        console.log(`Valor da Branch "${valorAtual}" alterado para "${novoValor}".`);
+        console.log(`Valor da Branch "${valorAtual}" alterado para "${novoValor}". Hash: ${hash}`);
         executarPrograma();
       });
     } else {
@@ -50,7 +61,12 @@ function fazerMerge() {
         vetor1.push(...vetor2);
 
         const valorMultiplicado = programa.vetores[valor1].valor * programa.vetores[valor2].valor;
-        console.log(`Branchs Mescladas! ${valor1} * ${valor2} = ${valorMultiplicado}`);
+
+        const hash = calcularHash(valorMultiplicado.toString()).substring(0, 6);
+        programa.vetores[valor1].hash = hash;
+        programa.comandos[hash] = "Merge";
+
+        console.log(`Branchs Mescladas! ${valor1} * ${valor2} = ${valorMultiplicado}. Hash: ${hash}`);
 
         executarPrograma();
       } else {
@@ -65,8 +81,25 @@ function exibirBranchs() {
   const branchs = Object.values(programa.vetores);
   console.log("Branchs criadas:");
   branchs.forEach((branch) => {
-    console.log(`- ${branch.valor}`);
+    console.log(`- ${branch.valor}. Hash: ${branch.hash}`);
   });
+  executarPrograma();
+}
+
+function exibirHashes() {
+  const hashes = Object.values(programa.vetores).map((branch) => branch.hash);
+  console.log("Hashes gerados:");
+  hashes.forEach((hash) => {
+    console.log(`- ${hash} - Comando: ${programa.comandos[hash]}`);
+  });
+  executarPrograma();
+}
+
+function mostrarTudo() {
+  console.log("Histórico de Hashes e Comandos:");
+  for (const hash in programa.comandos) {
+    console.log(`- Hash: ${hash} - Comando: ${programa.comandos[hash]}`);
+  }
   executarPrograma();
 }
 
@@ -81,7 +114,7 @@ function executarPrograma() {
     exibiuBoasVindas = true;
   }
 
-  rl.question('Digite um comando ("Branch", "Commit", "Merge", "Exibir") ou "Sair" para encerrar:', (comando) => {
+  rl.question('Digite um comando ("Branch", "Commit", "Merge", "Exibir", "Hashes", "MostrarTudo") ou "Sair" para encerrar:', (comando) => {
     switch (comando.toLowerCase()) {
       case "branch":
         criarBranch();
@@ -95,6 +128,12 @@ function executarPrograma() {
       case "exibir":
         exibirBranchs();
         break;
+      case "hashes":
+        exibirHashes();
+        break;
+      case "mostrartudo":
+        mostrarTudo();
+        break;
       case "sair":
         encerrarPrograma();
         break;
@@ -106,3 +145,10 @@ function executarPrograma() {
 }
 
 executarPrograma();
+
+// Função para calcular o hash de uma string
+function calcularHash(dados) {
+  const hash = crypto.createHash('sha256');
+  hash.update(dados);
+  return hash.digest('hex');
+}
