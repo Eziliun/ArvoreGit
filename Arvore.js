@@ -103,18 +103,39 @@ function mostrarTudo() {
   executarPrograma();
 }
 
+function pesquisarHash() {
+  rl.question("Digite o código da Hash que deseja pesquisar: ", (codigoHash) => {
+    let encontrada = false;
+    console.log("Histórico de Hashes:");
+    for (const branch in programa.vetores) {
+      const hash = programa.vetores[branch].hash;
+      const comando = programa.comandos[hash];
+      if (hash === codigoHash) {
+        console.log(`-> Hash: ${hash} - Comando: ${comando}`);
+        encontrada = true;
+      } else {
+        console.log(`   Hash: ${hash} - Comando: ${comando}`);
+      }
+    }
+    if (!encontrada) {
+      console.log("Hash não encontrada.");
+    }
+    executarPrograma();
+  });
+}
+
 function encerrarPrograma() {
-  console.log("Obrigado por usar o programa de Arvores! Até a próxima.");
+  console.log("Obrigado por usar o programa de Árvores! Até a próxima.");
   rl.close();
 }
 
 function executarPrograma() {
   if (!exibiuBoasVindas) {
-    console.log("Bem-vindo ao programa de Arvores!");
+    console.log("Bem-vindo ao programa de Árvores!");
     exibiuBoasVindas = true;
   }
 
-  rl.question('Digite um comando ("Branch", "Commit", "Merge", "Exibir", "Hashes", "MostrarTudo") ou "Sair" para encerrar:', (comando) => {
+  rl.question('Digite um comando ("Branch", "Commit", "Merge", "Exibir", "Hashes", "MostrarTudo", "PesquisarHash") ou "Sair" para encerrar:', (comando) => {
     switch (comando.toLowerCase()) {
       case "branch":
         criarBranch();
@@ -133,6 +154,9 @@ function executarPrograma() {
         break;
       case "mostrartudo":
         mostrarTudo();
+        break;
+      case "pesquisarhash":
+        pesquisarHash();
         break;
       case "sair":
         encerrarPrograma();
